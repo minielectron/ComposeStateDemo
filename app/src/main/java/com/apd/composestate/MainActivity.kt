@@ -9,10 +9,12 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.apd.composestate.ui.theme.ComposeStateTheme
 
 class MainActivity : ComponentActivity() {
@@ -27,7 +29,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun MainScreen() {
+private fun MainScreen(mainScreenVM: MainScreenVM = viewModel()) {
     Surface(
         color = Color.LightGray,
         modifier = Modifier.fillMaxSize()
@@ -38,23 +40,18 @@ private fun MainScreen() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.Top
         ) {
-            var text: String by remember {
-                mutableStateOf("")
-            }
-            var showOutput by remember {
-                mutableStateOf(false)
-            }
-
-            NameInput(text, onNameChange = { text = it })
+            val text by mainScreenVM.name.observeAsState("")
+            val showOutput by mainScreenVM.showOutput.observeAsState(false)
+            NameInput(text, onNameChange = { mainScreenVM.onNameChange(it) })
             Spacer(modifier = Modifier.height(10.dp))
-            if (showOutput) {
+            if (mainScreenVM.showOutput.value == true) {
                 NameOutput(name = text)
             }
             Spacer(modifier = Modifier.height(10.dp))
             Button(onClick = {
-                showOutput = true
+                mainScreenVM.enableShowOutput(!mainScreenVM.showOutput.value!!)
             }) {
-                Text(text = "Show output")
+                Text(text = "Enable Output")
             }
         }
 
